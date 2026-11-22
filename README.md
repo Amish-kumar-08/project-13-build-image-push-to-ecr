@@ -2,21 +2,17 @@
 
 ## Overview
 
-Built a Docker image for a sample web application and published it to Amazon Elastic Container Registry (ECR). Used Docker to containerize the application and AWS CLI to authenticate and push the image to a private ECR repository.
+Built a Docker image for a sample Nginx web application and published it to Amazon Elastic Container Registry (ECR). Used Docker to containerize the application and AWS CLI to authenticate, tag, and push the image to a private ECR repository.
 
 ## Objectives
 
-- Create a Dockerfile for the application.
+- Create a Dockerfile for the web application.
 - Build a Docker image locally.
-- Verify the Docker image.
+- Run and test the Docker container.
 - Create a private Amazon ECR repository.
-- Authenticate Docker with Amazon ECR.
+- Authenticate Docker with Amazon ECR using AWS CLI.
 - Tag and push the Docker image to ECR.
-- Verify that the image is successfully stored in ECR.
-
-## Architecture
-
-Application → Dockerfile → Docker Image → Amazon ECR
+- Verify the uploaded image using AWS CLI.
 
 ## Technologies Used
 
@@ -25,16 +21,19 @@ Application → Dockerfile → Docker Image → Amazon ECR
 - Docker
 - AWS CLI
 - Linux (Ubuntu)
+- Nginx
 - Git and GitHub
 
 ## AWS Configuration
 
 | Configuration | Value |
 |---|---|
-| AWS Region | ap-south-1 |
-| AWS Service | Amazon ECR |
+| AWS Region | ap-south-1 (Mumbai) |
+| AWS Account ID | 590507089733 |
+| ECR Repository | project-13-app-amish |
 | Repository Type | Private |
-| Container Tool | Docker |
+| Image Tag | latest |
+| Image Status | ACTIVE |
 
 ## Project Structure
 
@@ -48,65 +47,99 @@ project-13-build-image-push-to-ecr/
 
 ## Implementation Steps
 
-1. Created a GitHub repository for Project 13.
-2. Prepared a sample web application.
-3. Created a Dockerfile to containerize the application.
-4. Built a Docker image locally.
-5. Created a private repository in Amazon ECR.
-6. Authenticated Docker with Amazon ECR using AWS CLI.
-7. Tagged the Docker image with the ECR repository URI.
-8. Pushed the Docker image to Amazon ECR.
-9. Verified the uploaded image in the AWS Console.
+### 1. Create Docker Image
 
-## Docker Commands
-
-### Build Docker Image
+Built the Docker image using:
 
 ```bash
 docker build -t project-13-app .
 ```
 
-### Verify Docker Image
-
-```bash
-docker images
-```
-
-### Run Docker Container
+### 2. Run Docker Container
 
 ```bash
 docker run -d -p 8080:80 --name project-13-container project-13-app
 ```
 
-### AWS ECR Authentication
+### 3. Test Application
 
 ```bash
-aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+curl http://localhost:8080
 ```
 
-### Tag Docker Image
+Verified that the Nginx container successfully served the sample HTML application.
+
+### 4. Create Amazon ECR Repository
 
 ```bash
-docker tag project-13-app:latest <AWS_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/project-13-app:latest
+aws ecr create-repository \
+  --repository-name project-13-app-amish \
+  --image-tag-mutability MUTABLE \
+  --region ap-south-1
 ```
 
-### Push Docker Image to ECR
+### 5. Authenticate Docker with ECR
 
 ```bash
-docker push <AWS_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/project-13-app:latest
+aws ecr get-login-password --region ap-south-1 | \
+docker login --username AWS --password-stdin \
+590507089733.dkr.ecr.ap-south-1.amazonaws.com/project-13-app-amish
 ```
+
+### 6. Tag Docker Image
+
+```bash
+docker tag project-13-app:latest \
+590507089733.dkr.ecr.ap-south-1.amazonaws.com/project-13-app-amish:latest
+```
+
+### 7. Push Image to Amazon ECR
+
+```bash
+docker push \
+590507089733.dkr.ecr.ap-south-1.amazonaws.com/project-13-app-amish:latest
+```
+
+### 8. Verify Uploaded Image
+
+```bash
+aws ecr describe-images \
+  --repository-name project-13-app-amish \
+  --region ap-south-1
+```
+
+Verified that the image was successfully uploaded and its status was ACTIVE.
+
+## Amazon ECR Image Details
+
+**Repository URI:**
+
+```text
+590507089733.dkr.ecr.ap-south-1.amazonaws.com/project-13-app-amish
+```
+
+**Image Tag:** `latest`
+
+**Image Digest:**
+
+```text
+sha256:032b6e384350ce1cf2a4e82e32835808e1a2a3914859f9943752c7c76e68ba28
+```
+
+**Image Status:** ACTIVE
 
 ## Deliverables
 
 - Dockerfile
+- Sample HTML web application
 - Successfully built Docker image
-- Amazon ECR repository
+- Private Amazon ECR repository
 - Docker image successfully pushed to ECR
-- Screenshot of the uploaded image in Amazon ECR
+- AWS CLI verification output
 
 ## Outcome
 
-Successfully containerized a web application using Docker and published the Docker image to Amazon ECR. Gained practical experience with Docker image creation, AWS ECR configuration, container registry authentication, and image publishing.
+Successfully containerized a web application using Docker and published the Docker image to Amazon ECR. Gained practical experience with Docker image creation, container execution, AWS ECR configuration, registry authentication, image tagging, and image publishing using AWS CLI.
 
 ## Author
 
